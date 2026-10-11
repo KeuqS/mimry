@@ -15,6 +15,7 @@ from .intent import (
     query_terms,
 )
 from .paths import canonical_cached_rel_path
+from .pieces import best_ranges, piece_matches
 from .security import filter_index_records
 from .semantic import merge_semantic_rows, semantic_rows
 from .storage import connect, load_jsonl, load_pointer
@@ -165,6 +166,15 @@ def _fts_scores(idx, q: str) -> dict[str, tuple[int, str]]:
     return scores
 
 
+def _with_ranges(rows, pieces, id_by_path):
+    """Name the lines to read first in each result: its best pieces."""
+    out = []
+    for row in rows:
+        matches = pieces.get(id_by_path.get(row["path"], ""))
+        out.append({**row, "ranges": best_ranges(matches)} if matches else row)
+    return out
+
+
 def score(f, q, fts_boost: tuple[int, str] | None = None):
     terms = query_terms(q)
     h = {
@@ -300,7 +310,9 @@ def find_rows(
             + ", ".join(sorted(known_languages))
         )
     fts_scores = _fts_scores(idx, q)
-    known_paths = {f["rel_path"] for f in files}
+    pieces = piece_matches(idx, q)
+    id_by_path = {f["rel_path"]: f["file_id"] for f in files}
+    known_paths = set(id_by_path)
     candidate_limit = max(len(files), limit + scope["offset"]) if scoped_or_paginated else limit
 
     clusters = {}
@@ -391,7 +403,8 @@ def find_rows(
                 semantic,
                 excluded_paths,
             )
-            return _filter_and_page(ranked, scope=scope, languages_by_path=languages_by_path)
+            rows = _filter_and_page(ranked, scope=scope, languages_by_path=languages_by_path)
+            return _with_ranges(rows, pieces, id_by_path)
     ranked = apply_feedback_to_rows(fallback_rows, idx, root_id, q, known_paths=known_paths)
     ranked = _with_semantic(
         ranked,
@@ -403,4 +416,5 @@ def find_rows(
         semantic,
         excluded_paths,
     )
-    return _filter_and_page(ranked, scope=scope, languages_by_path=languages_by_path)
+    rows = _filter_and_page(ranked, scope=scope, languages_by_path=languages_by_path)
+    return _with_ranges(rows, pieces, id_by_path)
