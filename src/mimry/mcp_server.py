@@ -49,6 +49,7 @@ from mimry.security import (
     sanitize_query,
 )
 from mimry.semantic import semantic_health, semantic_rows
+from mimry.source_snippets import with_source_snippets
 from mimry.state import (
     GENERATION_SCHEMA_VERSION,
     IndexSchemaMigrationError,
@@ -407,8 +408,13 @@ def mimry_find(
     path_globs: list[str] | None = None,
     exclude_globs: list[str] | None = None,
     offset: int | None = None,
+    snippets: bool = False,
+    snippet_lines: int = 8,
+    snippet_chars: int = 800,
+    snippet_total_lines: int = 40,
+    snippet_total_chars: int = 4000,
 ) -> dict[str, Any]:
-    """Search files with opt-in stable pagination.
+    """Search files, optionally with bounded live-source snippets.
 
     Pass offset=0 on page one.
     """
@@ -433,6 +439,23 @@ def mimry_find(
             "returncode": 2,
             "error": {"code": "invalid_search_scope", "message": str(exc)},
         }
+    if snippets:
+        try:
+            rows = with_source_snippets(
+                rows,
+                root=root_path,
+                pointer=ptr,
+                query=query,
+                lines_per_result=snippet_lines,
+                chars_per_result=snippet_chars,
+                total_lines=snippet_total_lines,
+                total_chars=snippet_total_chars,
+            )
+        except ValueError as exc:
+            return {
+                "returncode": 2,
+                "error": {"code": "invalid_snippet_limits", "message": str(exc)},
+            }
     payload = {
         "query": redact_sensitive_text(query),
         "root": str(root_path),
