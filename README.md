@@ -247,6 +247,7 @@ Add `--verbose` (`-v`) to any command for paths, scores, and raw ranking reasons
 | `mimry init` / `mimry index` | Set up a repo and build the index |
 | `mimry reindex` / `mimry refresh` | Update the index (`--full` re-parses everything) |
 | `mimry status` | Is the index current? (`--verify` re-hashes every file) |
+| `mimry doctor` | Read-only install, parser, index, and cache diagnostics (`--json` for tools) |
 | `mimry watch` | Poll for changes and refresh when they settle |
 | `mimry git-hooks` | Keep the index fresh with git hooks (`install`/`uninstall`/`status`) |
 | `mimry feedback ...` | Record what helped; `feedback stats`, `list`, `show <id>` read it back |
@@ -261,6 +262,11 @@ Add `--verbose` (`-v`) to any command for paths, scores, and raw ranking reasons
 | `mimry cache wipe --current` | Delete this repo's cached index |
 
 Use `mimry --root /path/to/repo <command>` to target another repo.
+
+`mimry doctor` checks that the installed code matches its package, that its dependencies and parsers work, and that the repo's index and caches are intact.
+It only reads: it never sets up, indexes, repairs or installs anything, and it uses no network.
+Each problem comes with the command that fixes it.
+It exits 0 when everything is healthy, 1 when the repo is not set up or its index is out of date, and 2 when the install, a parser, the root or the index is broken.
 
 Keeping an index current:
 
