@@ -475,6 +475,7 @@ def main(argv=None):
         from .hook import cmd_hook_check
 
         return cmd_hook_check(SimpleNamespace(root=hook_root))
+    from .cache_safety import IndexOutsideCacheError
     from .plan import PlanError
     from .state import (
         IndexSchemaMigrationError,
@@ -500,6 +501,8 @@ def main(argv=None):
         ui.fail("Another MIMRY command is still using this index", str(exc))
     except RootIdentityError as exc:
         ui.fail("This .mimry folder belongs to a different location", str(exc))
+    except IndexOutsideCacheError as exc:
+        ui.fail("This repo's index is in another MIMRY cache", str(exc))
     except PlanError as exc:
         ui.fail("Plan error", str(exc))
     return 2
