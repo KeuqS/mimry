@@ -181,24 +181,6 @@ Check the skill installation with:
 mimry install --platform kilo --status
 ```
 
-### Grok
-
-MIMRY does not have a Grok-specific installer adapter yet. Add the following equivalent entry in Grok's MCP settings:
-
-```json
-{
-  "mcpServers": {
-    "mimry": {
-      "command": "uvx",
-      "args": ["mimry", "mcp"]
-    }
-  }
-}
-```
-
-If Grok's settings use separate fields, enter `uvx` as the command and `mimry mcp` as its arguments.
-Start a new Grok session and confirm that the MIMRY tools are listed; `mimry status` can then verify the repository index separately.
-
 To register it by hand instead:
 
 Claude Code:
