@@ -151,6 +151,54 @@ You never run `mimry-mcp` yourself: after `mimry install --platform <agent>`, th
 For other agents it prints the snippet to add in their MCP settings.
 Pass `--no-mcp`, or set `MIMRY_NO_MCP_REGISTRATION=1`, to skip it; a global `mimry uninstall --platform <agent>` removes it.
 
+### OpenCode
+
+Install MIMRY for OpenCode with:
+
+```bash
+mimry install --platform opencode
+```
+
+This installs the MIMRY skill at `~/.config/opencode/skills/mimry/SKILL.md` and adds the local MCP server to `~/.config/opencode/opencode.json`.
+Check the result with:
+
+```bash
+mimry install --platform opencode --status
+```
+
+### Kilo Code
+
+Install the MIMRY skill for Kilo Code with:
+
+```bash
+mimry install --platform kilo
+```
+
+The command writes the skill to `~/.config/kilo/skills/mimry/SKILL.md`; it does not modify a Kilo MCP configuration.
+Check the skill installation with:
+
+```bash
+mimry install --platform kilo --status
+```
+
+### Grok
+
+MIMRY does not have a Grok-specific installer adapter yet. Add the following equivalent entry in Grok's MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "mimry": {
+      "command": "uvx",
+      "args": ["mimry", "mcp"]
+    }
+  }
+}
+```
+
+If Grok's settings use separate fields, enter `uvx` as the command and `mimry mcp` as its arguments.
+Start a new Grok session and confirm that the MIMRY tools are listed; `mimry status` can then verify the repository index separately.
+
 To register it by hand instead:
 
 Claude Code:
